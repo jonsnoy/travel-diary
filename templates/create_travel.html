@@ -1,0 +1,216 @@
+{% extends "base.html" %}
+
+{% block title %}Создать путешествие{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <h1>Новое путешествие</h1>
+    
+    <form id="createTravelForm" enctype="multipart/form-data" method="POST" action="/create_travel">
+        <!-- Основная информация -->
+        <div class="form-section">
+            <h3>Основная информация</h3>
+            <div class="form-group">
+                <label for="title">Название путешествия *</label>
+                <input type="text" id="title" name="title" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="description">Описание *</label>
+                <textarea id="description" name="description" rows="4" required></textarea>
+            </div>
+        </div>
+
+        <!-- Местоположение -->
+        <div class="form-section">
+            <h3><i class="fas fa-map-marker-alt"></i> Местоположение</h3>
+            <button type="button" class="btn btn-secondary" onclick="getCurrentLocation()">
+                <i class="fas fa-location-arrow"></i> Определить текущее местоположение
+            </button>
+            
+            <div class="form-group">
+                <label for="location_address">Адрес</label>
+                <input type="text" id="location_address" name="location_address">
+            </div>
+            
+            <div class="coordinates-grid">
+                <div class="form-group">
+                    <label for="latitude">Широта</label>
+                    <input type="number" id="latitude" name="latitude" step="any" required>
+                </div>
+                <div class="form-group">
+                    <label for="longitude">Долгота</label>
+                    <input type="number" id="longitude" name="longitude" step="any" required>
+                </div>
+            </div>
+            
+            <div id="map" class="map-preview"></div>
+        </div>
+
+        <!-- Фотографии -->
+        <div class="form-section">
+            <h3><i class="fas fa-images"></i> Фотографии</h3>
+            <div class="form-group">
+                <label for="images">Выберите изображения (до 5)</label>
+                <input type="file" id="images" name="images" accept="image/*" multiple>
+            </div>
+            <div id="imagePreview" class="image-preview-grid"></div>
+        </div>
+
+        <!-- Стоимость -->
+        <div class="form-section">
+            <h3><i class="fas fa-ruble-sign"></i> Стоимость путешествия</h3>
+            <div class="form-group">
+                <label for="cost_amount">Сумма</label>
+                <input type="number" id="cost_amount" name="cost_amount" step="0.01" min="0">
+            </div>
+            
+            <div class="form-group">
+                <label for="cost_currency">Валюта</label>
+                <select id="cost_currency" name="cost_currency">
+                    <option value="RUB">RUB (Рубли)</option>
+                    <option value="USD">USD (Доллары)</option>
+                    <option value="EUR">EUR (Евро)</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="cost_details">Детали расходов</label>
+                <textarea id="cost_details" name="cost_details" rows="3"></textarea>
+            </div>
+        </div>
+
+        <!-- Места культурного наследия -->
+        <div class="form-section">
+            <h3><i class="fas fa-landmark"></i> Места культурного наследия</h3>
+            <div id="culturalSitesContainer">
+                <!-- Динамически добавляемые поля -->
+            </div>
+            <button type="button" class="btn btn-secondary" onclick="addCulturalSite()">
+                <i class="fas fa-plus"></i> Добавить место
+            </button>
+        </div>
+
+        <!-- Места для посещения -->
+        <div class="form-section">
+            <h3><i class="fas fa-list"></i> Места для посещения</h3>
+            <div id="placesToVisitContainer">
+                <!-- Динамически добавляемые поля -->
+            </div>
+            <button type="button" class="btn btn-secondary" onclick="addPlaceToVisit()">
+                <i class="fas fa-plus"></i> Добавить место
+            </button>
+        </div>
+
+        <!-- Оценки -->
+        <div class="form-section">
+            <h3><i class="fas fa-star"></i> Оценки</h3>
+            
+            {% set ratings = [
+                ('transport', 'transport_rating', 'Удобство передвижения', 'fa-bus'),
+                ('safety', 'safety_rating', 'Безопасность', 'fa-shield-alt'),
+                ('population', 'population_rating', 'Населенность', 'fa-users'),
+                ('vegetation', 'vegetation_rating', 'Растительность', 'fa-tree')
+            ] %}
+            
+            {% for id, name, label, icon in ratings %}
+                <div class="rating-group">
+                    <label>
+                        <i class="fas {{ icon }}"></i> {{ label }}
+                    </label>
+                    <div class="rating-input">
+                        <input type="range" id="{{ name }}" name="{{ name }}" 
+                               min="1" max="5" value="3" class="rating-slider"
+                               oninput="updateRatingValue('{{ name }}')">
+                        <span id="{{ name }}_value">3</span>/5
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <!-- Даты -->
+        <div class="form-section">
+            <h3><i class="fas fa-calendar-alt"></i> Даты</h3>
+            <div class="date-grid">
+                <div class="form-group">
+                    <label for="start_date">Дата начала</label>
+                    <input type="date" id="start_date" name="start_date">
+                </div>
+                <div class="form-group">
+                    <label for="end_date">Дата окончания</label>
+                    <input type="date" id="end_date" name="end_date">
+                </div>
+            </div>
+        </div>
+
+        <!-- Настройки видимости -->
+        <div class="form-section">
+            <label class="checkbox-label">
+                <input type="checkbox" name="is_public" checked>
+                Сделать путешествие публичным
+            </label>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-lg btn-block">
+            <i class="fas fa-save"></i> Создать запись о путешествии
+        </button>
+    </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU&apikey=ваш-api-ключ" type="text/javascript"></script>
+<script>
+    // Инициализация карты
+    let map;
+    let placemark;
+    
+    ymaps.ready(initMap);
+    
+    function initMap() {
+        map = new ymaps.Map('map', {
+            center: [55.76, 37.64],
+            zoom: 10
+        });
+        
+        map.events.add('click', function (e) {
+            const coords = e.get('coords');
+            setLocation(coords[0], coords[1]);
+        });
+    }
+    
+    function setLocation(lat, lng) {
+        document.getElementById('latitude').value = lat;
+        document.getElementById('longitude').value = lng;
+        
+        if (placemark) {
+            map.geoObjects.remove(placemark);
+        }
+        
+        placemark = new ymaps.Placemark([lat, lng]);
+        map.geoObjects.add(placemark);
+        map.setCenter([lat, lng], 15);
+        
+        // Получение адреса
+        ymaps.geocode([lat, lng]).then(function (res) {
+            const address = res.geoObjects.get(0).getAddressLine();
+            document.getElementById('location_address').value = address;
+        });
+    }
+    
+    function getCurrentLocation() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    setLocation(position.coords.latitude, position.coords.longitude);
+                },
+                function(error) {
+                    alert('Не удалось определить местоположение: ' + error.message);
+                }
+            );
+        } else {
+            alert('Геолокация не поддерживается вашим браузером');
+        }
+    }
+</script>
+{% endblock %}

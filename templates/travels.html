@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}Все путешествия{% endblock %}
+
+{% block content %}
+<h1>Все путешествия</h1>
+
+{% if travels %}
+    <div class="travel-grid">
+        {% for travel in travels %}
+            {% include 'travel_card.html' %}
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="empty-state">
+        <i class="fas fa-compass fa-4x"></i>
+        <h2>Пока нет путешествий</h2>
+        {% if current_user.is_authenticated %}
+            <p>Будьте первым! Создайте свое первое путешествие.</p>
+            <a href="/create_travel" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Создать путешествие
+            </a>
+        {% else %}
+            <p>Войдите, чтобы создать путешествие.</p>
+            <a href="/login" class="btn btn-primary">Войти</a>
+        {% endif %}
+    </div>
+{% endif %}
+{% endblock %}

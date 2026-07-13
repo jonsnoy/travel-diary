@@ -1,0 +1,46 @@
+<div class="travel-card">
+    {% if travel.images %}
+        <img src="{{ url_for('uploaded_file', filename=travel.images[0].filename) }}" 
+             alt="{{ travel.title }}" class="travel-card-image">
+    {% else %}
+        <div class="travel-card-image-placeholder">
+            <i class="fas fa-image fa-3x"></i>
+        </div>
+    {% endif %}
+    
+    <div class="travel-card-content">
+        <h3>{{ travel.title }}</h3>
+        <p class="travel-card-description">{{ travel.description[:150] }}...</p>
+        
+        {% if travel.location_address %}
+            <p class="travel-card-location">
+                <i class="fas fa-map-marker-alt"></i> {{ travel.location_address }}
+            </p>
+        {% endif %}
+        
+        <div class="travel-card-ratings">
+            <span title="Удобство передвижения">
+                <i class="fas fa-bus"></i> {{ travel.transport_rating }}/5
+            </span>
+            <span title="Безопасность">
+                <i class="fas fa-shield-alt"></i> {{ travel.safety_rating }}/5
+            </span>
+            <span title="Растительность">
+                <i class="fas fa-tree"></i> {{ travel.vegetation_rating }}/5
+            </span>
+        </div>
+        
+        <div class="travel-card-footer">
+            <span class="travel-card-author">
+                <i class="fas fa-user"></i> {{ travel.author.username }}
+            </span>
+            <span class="travel-card-date">
+                <i class="fas fa-calendar"></i> {{ travel.created_at.strftime('%d.%m.%Y') }}
+            </span>
+        </div>
+        
+        <a href="/travel/{{ travel.id }}" class="btn btn-primary btn-block mt-2">
+            Подробнее
+        </a>
+    </div>
+</div>

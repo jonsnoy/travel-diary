@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}Главная - Дневник путешествий{% endblock %}
+
+{% block content %}
+<div class="hero-section">
+    <h1>Делитесь своими путешествиями</h1>
+    <p>Создавайте записи о путешествиях, добавляйте фотографии, отмечайте места на карте</p>
+    {% if not current_user.is_authenticated %}
+        <div class="hero-buttons">
+            <a href="/register" class="btn btn-primary btn-lg">Начать путешествие</a>
+            <a href="/travels" class="btn btn-outline btn-lg">Смотреть путешествия</a>
+        </div>
+    {% endif %}
+</div>
+
+<div class="features-section">
+    <div class="feature-card">
+        <i class="fas fa-map-marked-alt fa-3x"></i>
+        <h3>Геопозиция</h3>
+        <p>Отмечайте местоположение на карте</p>
+    </div>
+    <div class="feature-card">
+        <i class="fas fa-camera fa-3x"></i>
+        <h3>Фотографии</h3>
+        <p>Делитесь красивыми снимками</p>
+    </div>
+    <div class="feature-card">
+        <i class="fas fa-landmark fa-3x"></i>
+        <h3>Достопримечательности</h3>
+        <p>Отмечайте культурные места</p>
+    </div>
+    <div class="feature-card">
+        <i class="fas fa-star fa-3x"></i>
+        <h3>Оценки</h3>
+        <p>Оценивайте удобство и безопасность</p>
+    </div>
+</div>
+
+{% if travels %}
+<div class="recent-travels">
+    <h2>Последние путешествия</h2>
+    <div class="travel-grid">
+        {% for travel in travels %}
+            {% include 'travel_card.html' %}
+        {% endfor %}
+    </div>
+    <div class="text-center mt-3">
+        <a href="/travels" class="btn btn-primary">Смотреть все</a>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

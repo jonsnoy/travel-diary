@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+
+{% block title %}{{ travel.title }}{% endblock %}
+
+{% block content %}
+<div class="travel-detail">
+    <div class="travel-detail-header">
+        <h1>{{ travel.title }}</h1>
+        <div class="travel-meta">
+            <span><i class="fas fa-user"></i> {{ travel.author.username }}</span>
+            <span><i class="fas fa-calendar"></i> {{ travel.created_at.strftime('%d.%m.%Y') }}</span>
+        </div>
+    </div>
+
+    {% if travel.images %}
+        <div class="travel-gallery">
+            {% for image in travel.images %}
+                <img src="{{ url_for('uploaded_file', filename=image.filename) }}" 
+                     alt="{{ image.caption or 'Изображение' }}">
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <div class="travel-content">
+        <div class="travel-description">
+            <h3>Описание</h3>
+            <p>{{ travel.description }}</p>
+        </div>
+
+        <div class="travel-info-grid">
+            {% if travel.location_address %}
+                <div class="info-card">
+                    <h4><i class="fas fa-map-marker-alt"></i> Местоположение</h4>
+                    <p>{{ travel.location_address }}</p>
+                    <p>Широта: {{ travel.latitude }}, Долгота: {{ travel.longitude }}</p>
+                </div>
+            {% endif %}
+
+            {% if travel.cost_amount %}
+                <div class="info-card">
+                    <h4><i class="fas fa-ruble-sign"></i> Стоимость</h4>
+                    <p>{{ travel.cost_amount }} {{ travel.cost_currency }}</p>
+                    {% if travel.cost_details %}
+                        <p>{{ travel.cost_details }}</p>
+                    {% endif %}
+                </div>
+            {% endif %}
+
+            <div class="info-card">
+                <h4><i class="fas fa-star"></i> Оценки</h4>
+                <div class="ratings-display">
+                    <div class="rating-item">
+                        <span><i class="fas fa-bus"></i> Удобство передвижения</span>
+                        <div class="stars">
+                            {% for i in range(5) %}
+                                <span class="star {% if i < travel.transport_rating %}filled{% endif %}">★</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="rating-item">
+                        <span><i class="fas fa-shield-alt"></i> Безопасность</span>
+                        <div class="stars">
+                            {% for i in range(5) %}
+                                <span class="star {% if i < travel.safety_rating %}filled{% endif %}">★</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="rating-item">
+                        <span><i class="fas fa-users"></i> Населенность</span>
+                        <div class="stars">
+                            {% for i in range(5) %}
+                                <span class="star {% if i < travel.population_rating %}filled{% endif %}">★</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="rating-item">
+                        <span><i class="fas fa-tree"></i> Растительность</span>
+                        <div class="stars">
+                            {% for i in range(5) %}
+                                <span class="star {% if i < travel.vegetation_rating %}filled{% endif %}">★</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% if travel.cultural_sites %}
+            <div class="travel-section">
+                <h3><i class="fas fa-landmark"></i> Места культурного наследия</h3>
+                <div class="sites-grid">
+                    {% for site in travel.cultural_sites %}
+                        <div class="site-card">
+                            <h4>{{ site.name }}</h4>
+                            <p>{{ site.description }}</p>
+                            <span class="badge badge-{{ 'success' if site.visited else 'secondary' }}">
+                                {{ 'Посещено' if site.visited else 'Не посещено' }}
+                            </span>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+
+        {% if travel.places_to_visit %}
+            <div class="travel-section">
+                <h3><i class="fas fa-list"></i> Места для посещения</h3>
+                <div class="places-list">
+                    {% for place in travel.places_to_visit %}
+                        <div class="place-item priority-{{ place.priority }}">
+                            <h4>{{ place.name }}</h4>
+                            <p>{{ place.description }}</p>
+                            <span class="badge badge-{{ place.priority }}">
+                                {{ {'low': 'Низкий', 'medium': 'Средний', 'high': 'Высокий'}[place.priority] }} приоритет
+                            </span>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+    {% if current_user.is_authenticated and current_user.id == travel.user_id %}
+        <div class="travel-actions">
+            <a href="/travel/{{ travel.id }}/edit" class="btn btn-primary">
+                <i class="fas fa-edit"></i> Редактировать
+            </a>
+            <form action="/travel/{{ travel.id }}/delete" method="POST" class="inline-form">
+                <button type="submit" class="btn btn-danger" onclick="return confirm('Вы уверены?')">
+                    <i class="fas fa-trash"></i> Удалить
+                </button>
+            </form>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
